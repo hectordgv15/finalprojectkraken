@@ -1,2 +1,2 @@
-## Final project: Python for data analysis
-# The main purpose of this project is to elaborate a technical analysis of several crypto assets through Kraken package and, at the same time, use all programming concepts to optimize the process. All visualizations and results will be in an interactive application. 
+# Final project: Python for data analysis
+- The main purpose of this project is to elaborate a technical analysis of several crypto assets through Kraken package and, at the same time, use all programming concepts to optimize the process. All visualizations and results will be in an interactive application. 
