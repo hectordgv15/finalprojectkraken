@@ -15,11 +15,17 @@ import datetime
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import plotly.express as px
+import plotly.io as pio
 from plotly.subplots import make_subplots
+
+# Streamlit
+import streamlit as st
+
+
 
 # =========================================================================================================================
 # Parameters
-ticker = 'SOLUSD' # Get information
+ticker = ('BTCUSD', 'ETHUSD', 'USDTUSD', 'BNBUSD', 'XRPUSD', 'USDCUSD', 'SOLUSD', 'ADAUASD', 'DOGEUSD', 'TRXUSD') # Get information
 interval = 1440 # Get information
 
 st_window = 14 # Compute indicator
@@ -31,15 +37,56 @@ api = krakenex.API()
 connection = KrakenAPI(api)
 
 # =========================================================================================================================
-# Extract information
-daily_data = connection.get_ohlc_data(ticker, interval = interval, ascending = True)[0]
-daily_data = daily_data.iloc[:, [1, 2, 3, 4, 6]].apply(pd.to_numeric, errors = 'coerce').reset_index()
-daily_data = daily_data.rename(columns = {'dtime': 'date'})
+# Function to extract the information
+def get_information_asset(ticker = 'BTCUSD', interval = 1440):
+    # Extract the information
+    data = connection.get_ohlc_data(ticker, interval = interval, ascending = True)[0]
+    data = data.iloc[:, [1, 2, 3, 4, 6]].apply(pd.to_numeric, errors = 'coerce').reset_index()
+    data = data.rename(columns = {'dtime': 'date'})
 
-# Interactive Graph
-fig = px.line(daily_data, x = 'date', y = 'close', title = 'Time series chart: {}'.format(ticker))
+    # Compute stochastic oscillator
+    data['period_high'] = data['high'].rolling(st_window).max()
+    data['period_low'] = data['low'].rolling(st_window).min()
+    data['pctK'] = (data['close'] - data['period_low']) * 100 / (data['period_high'] - data['period_low'])
+    data['pctD'] = data['pctK'].rolling(st_nmean).mean()
+    data = data.dropna().reset_index(drop = True)
+    
+    # Define sell and buy signals
+    data['buy_sell_signal'] = np.where(data['pctK'] > data['pctD'], 'Buy', 'Sell')
+    
+    return(data)
 
-fig.update_xaxes(
+Init_data = get_information_asset()
+
+
+# =========================================================================================================================
+# Streamlit App
+st.set_page_config(layout = "wide")
+    
+st.title("Kraken Project: Stochastic Oscillator for cryptocurrencies")
+st.write("This is an interactive site where you can see the behavior of all cryptocurrencies")
+
+st.sidebar.image("https://altcoinsbox.com/wp-content/uploads/2023/03/crypto.com-wallet-logo.png", caption = "")
+
+# Select date and asset
+start_date = st.sidebar.date_input('Start Date', min_value = Init_data['date'].min(), max_value = Init_data['date'].max())
+end_date = st.sidebar.date_input('End Date', min_value = Init_data['date'].min(), max_value = Init_data['date'].max())
+
+add_selectbox = st.sidebar.selectbox(
+    "Which asset do you want to see?",
+    ticker
+)
+
+
+# Filtered data
+daily_data = get_information_asset(ticker = add_selectbox, interval = interval)
+filtered_data = daily_data[(daily_data['date'] >= pd.to_datetime(start_date)) & (daily_data['date'] <= pd.to_datetime(end_date))]
+
+
+# Initial Graph
+fig_1 = px.line(filtered_data, x = 'date', y = 'close', title = 'Time series chart: {}'.format(add_selectbox))
+
+fig_1.update_xaxes(
     rangeslider_visible = True,
     rangeselector = dict(
         buttons = list([
@@ -51,42 +98,36 @@ fig.update_xaxes(
         ])
     )
 )
+fig_1.update_yaxes(title_text = "Close Price")
+fig_1.update_xaxes(title_text = "Date")
 
-fig.show()
 
-# =========================================================================================================================
-# Compute stochastic oscillator
-daily_data['period_high'] = daily_data['high'].rolling(st_window).max()
-daily_data['period_low'] = daily_data['low'].rolling(st_window).min()
-daily_data['pctK'] = (daily_data['close'] - daily_data['period_low']) * 100 / (daily_data['period_high'] - daily_data['period_low'])
-daily_data['pctD'] = daily_data['pctK'].rolling(st_nmean).mean()
-daily_data = daily_data.dropna().reset_index(drop = True)
+fig_1.update_layout(width = 1000, height = 600)
 
-daily_data['buy_sell_signal'] = np.where(daily_data['pctK'] > daily_data['pctD'], 'Buy', 'Sell')
 
 # Graph of indicator
-fig = make_subplots(specs = [[{"secondary_y": True}]])
+fig_2 = make_subplots(specs = [[{"secondary_y": True}]])
 
-fig.add_trace(
-    go.Scatter(x = daily_data['date'], y = daily_data['pctK'], name = "%K"),
+fig_2.add_trace(
+    go.Scatter(x = filtered_data['date'], y = filtered_data['pctK'], name = "%K"),
     secondary_y = False,
 )
 
-fig.add_trace(
-    go.Scatter(x = daily_data['date'], y = daily_data['pctD'], name = "%D"),
+fig_2.add_trace(
+    go.Scatter(x = filtered_data['date'], y = filtered_data['pctD'], name = "%D"),
     secondary_y = False,
 )
 
-fig.add_trace(
-    go.Scatter(x = daily_data['date'], y = daily_data['close'], name = "Close"),
+fig_2.add_trace(
+    go.Scatter(x = filtered_data['date'], y = filtered_data['close'], name = "Close"),
     secondary_y = True,
 )
 
-fig.update_layout(
-    title_text = 'Stochastic Oscillator: {}'.format(ticker)
+fig_2.update_layout(
+    title_text = 'Stochastic Oscillator: {}'.format(add_selectbox)
 )
 
-fig.update_xaxes(
+fig_2.update_xaxes(
     rangeslider_visible = True,
     rangeselector = dict(
         buttons = list([
@@ -99,11 +140,14 @@ fig.update_xaxes(
     )
 )
 
-fig.update_xaxes(title_text = "Date")
+fig_2.update_xaxes(title_text = "Date")
 
-fig.update_yaxes(title_text = "Indicator (%K, %D)", secondary_y = False)
-fig.update_yaxes(title_text = "Price", secondary_y = True)
+fig_2.update_yaxes(title_text = "Indicator (%K, %D)", secondary_y = False)
+fig_2.update_yaxes(title_text = "Close Price", secondary_y = True)
+fig_2.update_layout(width = 1000, height = 600)
 
-fig.show()
-
+# =========================================================================================================================
+# Show plots
+st.plotly_chart(fig_1)
+st.plotly_chart(fig_2)
 
