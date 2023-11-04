@@ -9,6 +9,7 @@ import krakenex
 from pykrakenapi import KrakenAPI
 
 # Dates
+import time
 import datetime
 from datetime import datetime, timedelta
 
@@ -30,17 +31,15 @@ st.title("STOCHASTIC OSCILLATOR FOR CRYPTOCURRENCIES")
 st.subheader("🔔 This is an interactive site where you can see the behavior of all cryptocurrencies")
 
 
-# Style
-with open('style.css')as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html = True)
-    
-st.snow()
+# Special effect    
+with st.spinner('Wait for it...'):
+    time.sleep(7)
     
     
 # =========================================================================================================================
 # Parameters and load data
 # Data
-ticker = ('BTCUSD', 'ETHUSD', 'USDTUSD', 'BNBUSD', 'XRPUSD', 'USDCUSD', 'SOLUSD', 'ADAUASD', 'DOGEUSD', 'TRXUSD') # Get information
+ticker = ('BTCUSD', 'ETHUSD', 'USDTUSD', 'XRPUSD', 'USDCUSD', 'SOLUSD', 'ADAUASD', 'DOGEUSD', 'TRXUSD') # Get information
 interval = 1440
 
 # Model
@@ -93,38 +92,55 @@ def get_information_asset(ticker = 'BTCUSD', interval = 1440):
     except:
         print("There is a problem with the function or its parameters")
 
-# Initial data to set date range
-Init_data = get_information_asset()
-
 
 # =========================================================================================================================
 # Site bar
 st.sidebar.image("../images/Logohg.png", caption = "Technological platform for financial services")
 
-# Select date and asset
-start_date = st.sidebar.date_input('Start date',
-                                   (datetime.today() - timedelta(days = days_plot_dafault)), 
-                                   min_value = Init_data['date'].min(), 
-                                   max_value = Init_data['date'].max()
-                                   )
 
-try:
-    end_date = st.sidebar.date_input('End date',
-                                    datetime.today(), 
-                                    min_value = Init_data['date'].min(), 
-                                    max_value = Init_data['date'].max()
+# Select date and asset
+def select_box_date(inicial_data, days_plot):
+    
+    '''
+    this function generates the box to select a specific range of dates.
+     
+    '''
+    
+    start_date = st.sidebar.date_input('Start date',
+                                    (datetime.today() - timedelta(days = days_plot)), 
+                                    min_value = inicial_data['date'].min(), 
+                                    max_value = inicial_data['date'].max()
                                     )
-except:
-    end_date = st.sidebar.date_input('End date',
-                                    datetime.today() - timedelta(days = 1), 
-                                    min_value = Init_data['date'].min(), 
-                                    max_value = Init_data['date'].max()
-                                    )
+
+    try:
+        end_date = st.sidebar.date_input('End date',
+                                        datetime.today(), 
+                                        min_value = inicial_data['date'].min(), 
+                                        max_value = inicial_data['date'].max()
+                                        )
+        
+    # Sometimes the user make a query when the data is not available because the API have not shown the data yet.    
+    except:
+        end_date = st.sidebar.date_input('End date',
+                                        datetime.today() - timedelta(days = 1), 
+                                        min_value = inicial_data['date'].min(), 
+                                        max_value = inicial_data['date'].max()
+                                        )
+    
+    return(start_date, end_date)
 
 add_selectbox = st.sidebar.selectbox(
                                     "Which asset do you want to see?", 
                                     ticker
                                     )
+
+
+# Apply
+# Initial data to set date range
+Init_data = get_information_asset()
+
+select_date = select_box_date(Init_data, days_plot_dafault)
+
 
 # =========================================================================================================================
 # Dataframe filtered
@@ -134,8 +150,8 @@ daily_data = get_information_asset(
                                   )
 
 
-filtered_data = daily_data[(daily_data['date'] >= pd.to_datetime(start_date)) & 
-                           (daily_data['date'] <= pd.to_datetime(end_date))]
+filtered_data = daily_data[(daily_data['date'] >= pd.to_datetime(select_date[0])) & 
+                           (daily_data['date'] <= pd.to_datetime(select_date[1]))]
 
 
 
