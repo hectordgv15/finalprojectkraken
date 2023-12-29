@@ -1,0 +1,79 @@
+
+[X] Descargar datos. Utilizando la librería Kraken (2 puntos). https://github.com/veox/python3-krakenex
+[X] Graficar cotizaciones. Input de usuario que permita graficar cualquier cotización o una a elegir en el menú (2 puntos).
+
+[X] Calcular el estocástico y graficarlo (1 puntos).
+[X] Calcular el estocástico sobre una media móvil (1 puntos).
+[X] Graficar el indicador junto con la cotización del par calculado (1 punto).
+
+[X] Funciones (0,5 puntos)
+[X] Utilización de clases (0,5 puntos)
+[X] Manejo de errores y excepciones (0,5 puntos)
+
+- Memoria. (2 puntos)
+[/] Descripción de cómo se ha afrontado el proyecto y por qué. (Hector)
+[/] Descripción detallada de cada uno de los puntos que se evalúan. (Hector)
+[ ] Descripción de la estructura del código y estructura de ficheros. (Aziz)
+[ ] Descripción de la forma de ejecución del código. (Aziz)
+[ ] Pantallazos de todo Aquel punto que requiera algún tipo de visualización. (Hector)
+
+
+- Extra.
+[X] Testeo y cobertura (unit-testing, integration-testing) 0,25 puntos (Aziz)
+[X] Facilitar los mecanismos para la reproducción del entorno virtual (ya sea con Poetry, Pipenv o pip) 0,25 puntos (Aziz)
+[ ] Distribución del proyecto a través de PyPi o una plataforma PaaS (AWS, Heroku, etc) 0,25 puntos (Aziz y Hector)
+[X] Mejor manejo de errores (Hector)
+[X] Incluir mayor cantidad de activos a través del API de Kraken (Hector)
+[X] Usar "krakenex" en vez de "pykrakenexapi"
+[X] Filtrar activos más comunes
+[X] Revisar avisos de compra y venta (creo que no son del todo correctos)
+
+
+Preguntas:
+1. Cálculo del estocástico sobre media móvil (URGENTE)
+2. Graficar volumen del activo [DONE]
+3. integration testing?
+
+----------------------------------------------------------------
+Estructura del proyecto:
+
+crypto_analysis
+    ├── config.yml
+    ├── crypto_analysis
+    │   ├── __init__.py
+    │   ├── app.py
+    │   ├── exception.py
+    │   ├── model.py
+    │   └── utils.py
+    ├── dist
+    │   ├── crypto_analysis-0.1.0-py3-none-any.whl
+    │   └── crypto_analysis-0.1.0.tar.gz
+    ├── images
+    │   ├── Logov1.png
+    │   └── Logov2.png
+    ├── tests
+    │   ├── test_app.py
+    │   ├── test_model.py
+    │   └── test_utils.py
+    ├── pyproject.toml
+    ├── README.md
+    ├── requirements.txt
+    ├── run.py
+    └── setup.py
+
+El proyecto sigue una estructura simple y sencilla de entender, basada en la plantilla que genera Poetry.
+Consta del modulo principal: "crypto_analysis", donde se encuentra:
+- app.py: con la clase que genera y despliega el dashboard utilizando Streamlit
+- model.py: Con la clase que realiza la extracción y procesamiento de los datos de la API de kraken
+- exception.py: Con la clase que maneja las excepciones del proyecto
+- utils.py: con funciones auxiliares transversales a todo el proyecto
+
+En cuanto a la ejecución, se deben seguir los siguientes pasos:
+1. Descargar el codigo fuente del proyecto (TODO: indicar zip)
+, extraerlo y navegar hasta la localización del proyecto 
+
+2. Instalación de la librería del proyecto "crypto_analysis" usando pip, esto instalará todas las dependencias necesarias:
+    pip install .\dist\crypto_analysis-0.1.0-py3-none-any.whl
+
+3. Ejecutar run.py usando Streamlit, para desplegar el dashboard
+    streamlit run .\run.py

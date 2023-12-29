@@ -1,0 +1,24 @@
+model:
+  stochastic_window: 14
+  stochastic_nmean: 3
+
+data:
+  interval: 1440
+  window_size_ma: 26
+
+visual:
+  days_plot_default: 365
+  w_plot: 1000
+  h_plot: 600
+
+logo:
+  path: ./images/Logov2.png
+  caption: Technological platform for financial services
+
+text:
+  title: STOCHASTIC OSCILLATOR FOR CRYPTOCURRENCIES
+  subtitle: This is an interactive site where you can see the behavior of all cryptocurrencies
+  asset_selectbox: Which asset do you want to see?
+  data_expander: Asset information
+  asset_warning: You have chosen the wrong option
+

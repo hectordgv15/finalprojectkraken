@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "crypto-analysis"
+version = "0.1.0"
+description = ""
+authors = ["Aziz", "Hector"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+krakenex = "^2.1.0"
+matplotlib = "^3.7.2"
+numpy = "^1.26.1"
+pandas = "^2.0.3"
+plotly = "^5.17.0"
+pykrakenapi = "^0.3.1"
+streamlit = "^1.27.2"
+PyYAML = "^6.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
